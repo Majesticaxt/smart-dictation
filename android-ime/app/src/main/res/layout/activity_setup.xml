@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#0a0a1a"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🎙️"
+        android:textSize="52sp"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Smart Dictation"
+        android:textColor="#e2e8f0"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="AI-powered voice keyboard"
+        android:textColor="#64748b"
+        android:textSize="14sp"
+        android:layout_marginBottom="32dp" />
+
+    <TextView
+        android:id="@+id/tv_step"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="#a5b4fc"
+        android:textSize="15sp"
+        android:gravity="center"
+        android:padding="16dp"
+        android:background="#1e1b4b"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/btn_grant_mic"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="🎤  Grant Microphone Permission"
+        android:backgroundTint="#4f46e5"
+        android:textColor="white"
+        android:textSize="15sp"
+        android:layout_marginBottom="12dp" />
+
+    <Button
+        android:id="@+id/btn_enable_keyboard"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="⚙️  Enable Keyboard in Settings"
+        android:backgroundTint="#312e81"
+        android:textColor="white"
+        android:textSize="15sp" />
+
+</LinearLayout>

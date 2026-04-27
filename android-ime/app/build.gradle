@@ -1,0 +1,53 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.majesticaxt.smartdictation'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.majesticaxt.smartdictation"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        // Inject Groq API key at build time (from env var or gradle property)
+        def groqKey = System.getenv("GROQ_API_KEY") ?: project.findProperty("GROQ_API_KEY") ?: ""
+        buildConfigField "String", "GROQ_API_KEY", "\"${groqKey}\""
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+
+    // HTTP for Groq API calls
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
+    // Coroutines for async AI cleanup
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1'
+}
