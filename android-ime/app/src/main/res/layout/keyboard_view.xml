@@ -4,25 +4,29 @@
     android:layout_height="wrap_content"
     android:background="#0a0a1a"
     android:orientation="vertical"
-    android:padding="12dp"
-    android:minHeight="260dp">
+    android:padding="8dp"
+    android:minHeight="300dp">
 
-    <!-- Text preview area -->
+    <!-- Editable text preview area -->
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="90dp"
+        android:layout_height="100dp"
         android:background="#111128"
         android:padding="2dp">
-        <TextView
-            android:id="@+id/tv_preview"
+        <EditText
+            android:id="@+id/et_preview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:padding="10dp"
             android:textColor="#e2e8f0"
             android:textSize="15sp"
             android:lineSpacingMultiplier="1.4"
-            android:hint="Speak something…"
-            android:textColorHint="#4a5568" />
+            android:hint="Speak or type here…"
+            android:textColorHint="#4a5568"
+            android:background="@android:color/transparent"
+            android:gravity="top|start"
+            android:inputType="textMultiLine"
+            android:importantForAutofill="no" />
     </ScrollView>
 
     <!-- Status line -->
@@ -36,25 +40,55 @@
         android:gravity="center"
         android:paddingVertical="4dp" />
 
-    <!-- Microphone button -->
+    <!-- Microphone button — large and centered -->
     <ImageButton
         android:id="@+id/btn_mic"
-        android:layout_width="68dp"
-        android:layout_height="68dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginVertical="6dp"
+        android:layout_marginVertical="4dp"
         android:background="#312e81"
         android:src="@android:drawable/ic_btn_speak_now"
         android:contentDescription="Microphone"
         android:scaleType="centerInside"
         android:padding="14dp" />
 
-    <!-- Action buttons row -->
+    <!-- Main action buttons row -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="44dp"
+        android:layout_height="42dp"
         android:orientation="horizontal"
-        android:layout_marginTop="6dp">
+        android:layout_marginTop="4dp">
+
+        <Button
+            android:id="@+id/btn_clean"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="✨ Clean"
+            android:textSize="12sp"
+            android:backgroundTint="#312e81"
+            android:textColor="#a5b4fc"
+            android:layout_marginEnd="3dp" />
+
+        <Button
+            android:id="@+id/btn_insert"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="✅ Insert"
+            android:textSize="12sp"
+            android:backgroundTint="#14532d"
+            android:textColor="#86efac" />
+
+    </LinearLayout>
+
+    <!-- Secondary action buttons row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:orientation="horizontal"
+        android:layout_marginTop="3dp">
 
         <Button
             android:id="@+id/btn_switch"
@@ -62,54 +96,43 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="⌨️"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:backgroundTint="#1e1b4b"
             android:textColor="#94a3b8"
-            android:layout_marginEnd="4dp" />
+            android:layout_marginEnd="3dp" />
+
+        <Button
+            android:id="@+id/btn_delete_word"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.5"
+            android:text="⌫ Word"
+            android:textSize="11sp"
+            android:backgroundTint="#1e1b4b"
+            android:textColor="#94a3b8"
+            android:layout_marginEnd="3dp" />
+
+        <Button
+            android:id="@+id/btn_undo"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="↩ Undo"
+            android:textSize="11sp"
+            android:backgroundTint="#1e1b4b"
+            android:textColor="#94a3b8"
+            android:layout_marginEnd="3dp" />
 
         <Button
             android:id="@+id/btn_clear"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1.5"
+            android:layout_weight="1"
             android:text="Clear"
-            android:textSize="13sp"
+            android:textSize="11sp"
             android:backgroundTint="#7f1d1d"
-            android:textColor="#fca5a5"
-            android:layout_marginEnd="4dp" />
-
-        <Button
-            android:id="@+id/btn_clean"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:text="✨ Clean"
-            android:textSize="13sp"
-            android:backgroundTint="#312e81"
-            android:textColor="#a5b4fc"
-            android:layout_marginEnd="4dp" />
-
-        <Button
-            android:id="@+id/btn_insert"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="2.5"
-            android:text="✅ Insert"
-            android:textSize="13sp"
-            android:backgroundTint="#14532d"
-            android:textColor="#86efac" />
+            android:textColor="#fca5a5" />
 
     </LinearLayout>
-
-    <!-- Delete last character -->
-    <Button
-        android:id="@+id/btn_delete"
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:text="⌫  Delete last character"
-        android:textSize="12sp"
-        android:backgroundTint="#1e1b4b"
-        android:textColor="#64748b"
-        android:layout_marginTop="4dp" />
 
 </LinearLayout>
