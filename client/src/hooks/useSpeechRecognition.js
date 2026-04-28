@@ -6,55 +6,49 @@ import { fullPunctuationPipeline } from '../utils/punctuation';
  * instead of adding new text.
  */
 const VOICE_COMMANDS = {
-  // Delete the last sentence or phrase
   'scratch that': { action: 'DELETE_LAST_SENTENCE' },
   'delete that': { action: 'DELETE_LAST_SENTENCE' },
   'remove that': { action: 'DELETE_LAST_SENTENCE' },
-
-  // Delete just the last word
   'delete last word': { action: 'DELETE_LAST_WORD' },
   'remove last word': { action: 'DELETE_LAST_WORD' },
   'backspace': { action: 'DELETE_LAST_WORD' },
-
-  // Delete last few words
   'undo': { action: 'DELETE_LAST_CHUNK' },
   'undo that': { action: 'DELETE_LAST_CHUNK' },
   'go back': { action: 'DELETE_LAST_CHUNK' },
-
-  // Clear everything
   'clear all': { action: 'CLEAR_ALL' },
   'clear everything': { action: 'CLEAR_ALL' },
   'start over': { action: 'CLEAR_ALL' },
-
-  // Replace last word
   'correction': { action: 'REPLACE_MODE' },
   'replace that with': { action: 'REPLACE_MODE' },
 };
 
-/**
- * Check if a transcript contains a voice command.
- * Returns { action, remaining } or null.
- */
 function detectVoiceCommand(transcript) {
   const lower = transcript.trim().toLowerCase();
-
-  // Sort by length (longest match first)
   const commands = Object.keys(VOICE_COMMANDS).sort((a, b) => b.length - a.length);
-
   for (const cmd of commands) {
     if (lower === cmd || lower.startsWith(cmd + ' ') || lower.endsWith(' ' + cmd)) {
       const remaining = lower.replace(cmd, '').trim();
       return { ...VOICE_COMMANDS[cmd], remaining };
     }
   }
-
   return null;
+}
+
+/**
+ * Detect if running on Android
+ */
+function isAndroid() {
+  return /android/i.test(navigator.userAgent);
 }
 
 /**
  * Custom hook for Web Speech API speech recognition.
  * Handles browser compatibility, continuous listening, punctuation processing,
  * and voice correction commands.
+ *
+ * KEY FIX for Android: Android Chrome sends progressive final results for
+ * the same utterance ("Good" → "Good afternoon" → "Good afternoon sir").
+ * We detect these extensions and REPLACE the last result instead of appending.
  */
 export function useSpeechRecognition(customPunctuationMap = {}) {
   const [isListening, setIsListening] = useState(false);
@@ -66,9 +60,12 @@ export function useSpeechRecognition(customPunctuationMap = {}) {
   const onResultCallbackRef = useRef(null);
   const onCommandCallbackRef = useRef(null);
   const shouldBeListeningRef = useRef(false);
-  const recentTranscriptsRef = useRef(new Map());
 
-  // Check browser support on mount
+  // Android progressive result tracking
+  const lastFinalRef = useRef('');        // Last final text we emitted
+  const lastFinalTimeRef = useRef(0);     // When it was emitted
+  const onReplaceCallbackRef = useRef(null);  // Replace callback for extensions
+
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -77,26 +74,22 @@ export function useSpeechRecognition(customPunctuationMap = {}) {
     }
   }, []);
 
-  /**
-   * Set the callback for when final text results come in.
-   * @param {Function} callback - Receives the processed final text
-   */
   const setOnResult = useCallback((callback) => {
     onResultCallbackRef.current = callback;
   }, []);
 
-  /**
-   * Set the callback for when a voice command is detected.
-   * @param {Function} callback - Receives { action, remaining }
-   */
   const setOnCommand = useCallback((callback) => {
     onCommandCallbackRef.current = callback;
   }, []);
 
   /**
-   * Create and start a FRESH recognition instance.
-   * Key fix: never reuse the old instance on Android — it replays old results.
+   * Set the callback for when text should be REPLACED (Android extension detection).
+   * @param {Function} callback - Receives (oldText, newText)
    */
+  const setOnReplace = useCallback((callback) => {
+    onReplaceCallbackRef.current = callback;
+  }, []);
+
   const startNewInstance = useCallback(() => {
     if (!shouldBeListeningRef.current) return;
 
@@ -133,19 +126,34 @@ export function useSpeechRecognition(customPunctuationMap = {}) {
         const trimmed = finalTranscript.trim();
         if (!trimmed) return;
 
-        // ── Deduplication: skip if seen this EXACT text within 4 seconds ──
         const now = Date.now();
         const key = trimmed.toLowerCase().replace(/\s+/g, ' ');
+        const lastKey = lastFinalRef.current.toLowerCase().replace(/\s+/g, ' ');
+        const timeSinceLast = now - lastFinalTimeRef.current;
 
-        const lastSeen = recentTranscriptsRef.current.get(key);
-        if (lastSeen && now - lastSeen < 4000) return; // exact duplicate — skip
+        // ── Android progressive result detection ──
+        // If the new result starts with or contains the last result,
+        // it's an extension of the same utterance → REPLACE
+        if (lastKey && timeSinceLast < 5000 && key.startsWith(lastKey) && key !== lastKey) {
+          // This is an extension: "Good" → "Good afternoon"
+          const oldProcessed = fullPunctuationPipeline(lastFinalRef.current.trim(), customPunctuationMap);
+          const newProcessed = fullPunctuationPipeline(trimmed, customPunctuationMap);
 
-        recentTranscriptsRef.current.set(key, now);
+          lastFinalRef.current = trimmed;
+          lastFinalTimeRef.current = now;
 
-        // Clean old entries
-        for (const [k, t] of recentTranscriptsRef.current.entries()) {
-          if (now - t > 5000) recentTranscriptsRef.current.delete(k);
+          if (onReplaceCallbackRef.current) {
+            onReplaceCallbackRef.current(oldProcessed, newProcessed);
+          }
+          return;
         }
+
+        // ── Exact duplicate check ──
+        if (key === lastKey && timeSinceLast < 4000) return;
+
+        // ── New utterance ──
+        lastFinalRef.current = trimmed;
+        lastFinalTimeRef.current = now;
 
         // Check for voice commands
         const command = detectVoiceCommand(trimmed);
@@ -164,7 +172,6 @@ export function useSpeechRecognition(customPunctuationMap = {}) {
     };
 
     recognition.onend = () => {
-      // ── Key fix: spawn a FRESH instance, never restart the same one ──
       if (shouldBeListeningRef.current) {
         setTimeout(() => startNewInstance(), 150);
       } else {
@@ -182,19 +189,14 @@ export function useSpeechRecognition(customPunctuationMap = {}) {
     }
   }, [customPunctuationMap]);
 
-  /**
-   * Start listening.
-   */
   const start = useCallback(() => {
     if (!isSupported) return;
     shouldBeListeningRef.current = true;
-    recentTranscriptsRef.current.clear();
+    lastFinalRef.current = '';
+    lastFinalTimeRef.current = 0;
     startNewInstance();
   }, [isSupported, startNewInstance]);
 
-  /**
-   * Stop listening.
-   */
   const stop = useCallback(() => {
     shouldBeListeningRef.current = false;
     if (recognitionRef.current) {
@@ -204,6 +206,8 @@ export function useSpeechRecognition(customPunctuationMap = {}) {
     }
     setIsListening(false);
     setInterimText('');
+    lastFinalRef.current = '';
+    lastFinalTimeRef.current = 0;
   }, []);
 
   return {
@@ -215,5 +219,6 @@ export function useSpeechRecognition(customPunctuationMap = {}) {
     stop,
     setOnResult,
     setOnCommand,
+    setOnReplace,
   };
 }

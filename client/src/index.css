@@ -896,6 +896,179 @@ body {
 .profile-btn:hover { background: var(--bg-card-hover); }
 .profile-btn--reset:hover { border-color: var(--red); color: var(--red); }
 
+/* ===== Mobile Tab Navigation ===== */
+.mobile-tabs {
+  display: none; /* Hidden on desktop */
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(10, 10, 26, 0.9);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 60px;
+  z-index: 49;
+}
+
+.mobile-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.mobile-tab--active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.mobile-tab-icon { font-size: 1rem; }
+
+/* ===== Dashboard ===== */
+.dashboard {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dash-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(12px);
+  padding: 24px;
+}
+
+.dash-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.dash-count {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--accent);
+}
+
+/* Stats Grid */
+.dash-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.dash-stat-card {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.08));
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dash-stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent), #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dash-stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+/* Quick Actions */
+.dash-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.dash-action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.dash-action-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-active);
+  transform: translateY(-2px);
+}
+
+.dash-action-icon { font-size: 1.5rem; }
+.dash-action-label { font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); }
+
+/* Lists */
+.dash-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dash-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  background: rgba(0,0,0,0.2);
+  font-size: 0.8rem;
+}
+
+.dash-list-from { color: var(--text-secondary); }
+.dash-list-arrow { color: var(--text-muted); font-size: 0.75rem; }
+.dash-list-to { color: var(--accent); font-weight: 500; }
+
+.dash-empty {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 12px 0;
+}
+
+.dash-more {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 8px;
+}
+
 /* ===== Scrollbar ===== */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1016,6 +1189,25 @@ body {
   /* Shortcut bar — hide on mobile (using touch) */
   .shortcut-bar {
     display: none;
+  }
+
+  /* Mobile tabs — show on mobile */
+  .mobile-tabs {
+    display: flex;
+  }
+
+  /* Dashboard responsive */
+  .dash-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dash-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dash-section {
+    padding: 16px;
+  }
+  .dash-stat-value {
+    font-size: 1.4rem;
   }
 
   /* Settings panel — full screen on mobile */

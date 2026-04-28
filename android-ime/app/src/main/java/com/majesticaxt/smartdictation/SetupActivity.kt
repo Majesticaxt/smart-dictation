@@ -3,16 +3,23 @@ package com.majesticaxt.smartdictation
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.view.View
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.webkit.WebSettings
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
 class SetupActivity : AppCompatActivity() {
+
+    private val PWA_URL = "https://smart-dictation-gamma.vercel.app/"
 
     private val requestMic = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -29,13 +36,50 @@ class SetupActivity : AppCompatActivity() {
             startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
         }
         findViewById<Button>(R.id.btn_open_website).setOnClickListener {
-            val url = "https://smart-dictation.vercel.app"
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            // Show the WebView with the PWA
+            showWebView()
         }
         updateUI()
     }
 
     override fun onResume() { super.onResume(); updateUI() }
+
+    private fun showWebView() {
+        val setupLayout = findViewById<LinearLayout>(R.id.setup_layout)
+        val webView = findViewById<WebView>(R.id.webview)
+
+        setupLayout.visibility = View.GONE
+        webView.visibility = View.VISIBLE
+
+        webView.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            mediaPlaybackRequiresUserGesture = false
+            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            setSupportMultipleWindows(false)
+            cacheMode = WebSettings.LOAD_DEFAULT
+        }
+
+        webView.webViewClient = WebViewClient()
+        webView.webChromeClient = WebChromeClient()
+        webView.loadUrl(PWA_URL)
+    }
+
+    override fun onBackPressed() {
+        val webView = findViewById<WebView>(R.id.webview)
+        val setupLayout = findViewById<LinearLayout>(R.id.setup_layout)
+
+        if (webView.visibility == View.VISIBLE) {
+            if (webView.canGoBack()) {
+                webView.goBack()
+            } else {
+                webView.visibility = View.GONE
+                setupLayout.visibility = View.VISIBLE
+            }
+        } else {
+            super.onBackPressed()
+        }
+    }
 
     private fun updateUI() {
         val hasMic = ContextCompat.checkSelfPermission(
