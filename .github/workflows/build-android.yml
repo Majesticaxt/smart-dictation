@@ -3,7 +3,7 @@ name: Build Android IME APK
 on:
   push:
     branches: [ main ]
-    paths: [ 'android-ime/**', '.github/workflows/build-android.yml' ]
+    paths: [ 'android-ime/**', '.github/workflows/build-android.yml', 'client/public/icon-512.png' ]
   workflow_dispatch:
 
 jobs:
@@ -27,6 +27,14 @@ jobs:
         run: |
           sdkmanager "platforms;android-34" "build-tools;34.0.0"
           yes | sdkmanager --licenses || true
+
+      - name: Copy app icon from PWA
+        run: |
+          mkdir -p android-ime/app/src/main/res/mipmap-xxxhdpi
+          cp client/public/icon-512.png android-ime/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          cp client/public/icon-512.png android-ime/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+          # Remove adaptive icon overrides so PNG is used
+          rm -rf android-ime/app/src/main/res/mipmap-anydpi-v26
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4

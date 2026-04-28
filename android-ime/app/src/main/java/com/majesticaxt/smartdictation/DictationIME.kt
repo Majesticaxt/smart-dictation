@@ -22,7 +22,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 
-class DictationIME : InputMethodService(), RecognitionListener {
+class DictationIME : InputMethodService() {
 
     // ── State ──────────────────────────────────────────────────────────────
     private enum class State { IDLE, LISTENING, HAS_TEXT, CLEANING }
@@ -30,6 +30,7 @@ class DictationIME : InputMethodService(), RecognitionListener {
     private var state = State.IDLE
     private var currentText = ""
     private var isListening = false
+    private var recognizerGeneration = 0  // prevents stale callbacks
 
     // ── Views ──────────────────────────────────────────────────────────────
     private var etPreview: EditText? = null
@@ -50,47 +51,29 @@ class DictationIME : InputMethodService(), RecognitionListener {
     companion object {
         private val GROQ_API_KEY: String = BuildConfig.GROQ_API_KEY
         private const val GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-        private const val DEDUP_MS = 3000L
+        private const val DEDUP_MS = 4000L
     }
 
     // ── Punctuation & Voice Commands ───────────────────────────────────────
     private val punctuationMap = mapOf(
-        "comma" to ",",
-        "period" to ".",
-        "full stop" to ".",
-        "dot" to ".",
-        "question mark" to "?",
-        "exclamation mark" to "!",
-        "exclamation point" to "!",
-        "colon" to ":",
-        "semicolon" to ";",
-        "open quote" to "\"",
-        "close quote" to "\"",
-        "open parenthesis" to "(",
-        "close parenthesis" to ")",
-        "dash" to "-",
-        "hyphen" to "-",
-        "ellipsis" to "...",
-        "at sign" to "@",
-        "hashtag" to "#",
-        "ampersand" to "&",
-        "apostrophe" to "'",
-        "new line" to "\n",
-        "new paragraph" to "\n\n"
+        "comma" to ",", "period" to ".", "full stop" to ".", "dot" to ".",
+        "question mark" to "?", "exclamation mark" to "!", "exclamation point" to "!",
+        "colon" to ":", "semicolon" to ";",
+        "open quote" to "\"", "close quote" to "\"",
+        "open parenthesis" to "(", "close parenthesis" to ")",
+        "dash" to "-", "hyphen" to "-", "ellipsis" to "...",
+        "at sign" to "@", "hashtag" to "#", "ampersand" to "&", "apostrophe" to "'",
+        "new line" to "\n", "new paragraph" to "\n\n"
     )
 
     private val voiceCommands = mapOf(
-        "scratch that" to "DELETE_LAST_SENTENCE",
-        "delete that" to "DELETE_LAST_SENTENCE",
+        "scratch that" to "DELETE_LAST_SENTENCE", "delete that" to "DELETE_LAST_SENTENCE",
         "remove that" to "DELETE_LAST_SENTENCE",
-        "delete last word" to "DELETE_LAST_WORD",
-        "remove last word" to "DELETE_LAST_WORD",
+        "delete last word" to "DELETE_LAST_WORD", "remove last word" to "DELETE_LAST_WORD",
         "backspace" to "DELETE_LAST_WORD",
-        "undo" to "DELETE_LAST_CHUNK",
-        "undo that" to "DELETE_LAST_CHUNK",
+        "undo" to "DELETE_LAST_CHUNK", "undo that" to "DELETE_LAST_CHUNK",
         "go back" to "DELETE_LAST_CHUNK",
-        "clear all" to "CLEAR_ALL",
-        "clear everything" to "CLEAR_ALL",
+        "clear all" to "CLEAR_ALL", "clear everything" to "CLEAR_ALL",
         "start over" to "CLEAR_ALL"
     )
 
@@ -109,7 +92,7 @@ class DictationIME : InputMethodService(), RecognitionListener {
         btnSwitch     = view.findViewById(R.id.btn_switch)
         btnUndo       = view.findViewById(R.id.btn_undo)
 
-        // Sync EditText changes back to currentText
+        // Sync EditText → currentText
         etPreview?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -119,10 +102,8 @@ class DictationIME : InputMethodService(), RecognitionListener {
             }
         })
 
-        initSpeechRecognizer()
         setupClickListeners()
         applyState(State.IDLE)
-
         return view
     }
 
@@ -133,19 +114,102 @@ class DictationIME : InputMethodService(), RecognitionListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        speechRecognizer?.destroy()
+        destroyRecognizer()
         scope.cancel()
     }
 
-    // ── Speech recognizer ──────────────────────────────────────────────────
+    // ── Speech recognizer — fresh instance every time ──────────────────────
 
-    private fun initSpeechRecognizer() {
+    private fun destroyRecognizer() {
+        try { speechRecognizer?.destroy() } catch (_: Exception) {}
+        speechRecognizer = null
+    }
+
+    private fun createFreshRecognizer(gen: Int) {
+        destroyRecognizer()
+
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
             setStatus("⚠️ Speech recognition unavailable")
             return
         }
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
-        speechRecognizer?.setRecognitionListener(this)
+
+        val recognizer = SpeechRecognizer.createSpeechRecognizer(this)
+        val listener = object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) {
+                if (gen != recognizerGeneration) return
+                setStatus("🔴 Listening…")
+            }
+            override fun onBeginningOfSpeech() {}
+            override fun onRmsChanged(rmsdB: Float) {}
+            override fun onBufferReceived(buffer: ByteArray?) {}
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+
+            override fun onPartialResults(partialResults: Bundle?) {
+                if (gen != recognizerGeneration) return
+                val partial = partialResults
+                    ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    ?.firstOrNull() ?: return
+                // Show partials in the STATUS BAR only — never write to EditText
+                setStatus("🎤 $partial")
+            }
+
+            override fun onResults(results: Bundle?) {
+                if (gen != recognizerGeneration) return
+                val result = results
+                    ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    ?.firstOrNull()?.trim() ?: return
+
+                // Deduplication
+                val now = System.currentTimeMillis()
+                val key = result.lowercase().replace("\\s+".toRegex(), " ")
+                val lastSeen = recentTranscripts[key]
+                if (lastSeen != null && now - lastSeen < DEDUP_MS) return
+                recentTranscripts[key] = now
+                recentTranscripts.entries.removeIf { now - it.value > DEDUP_MS + 1000 }
+
+                // Process voice commands and punctuation
+                val processed = processTranscript(result)
+                if (processed != null) {
+                    currentText += (if (currentText.isBlank()) "" else " ") + processed
+                    etPreview?.setText(currentText)
+                    etPreview?.setSelection(currentText.length)
+                }
+
+                // Auto-restart with a FRESH instance
+                if (isListening) {
+                    val nextGen = ++recognizerGeneration
+                    createFreshRecognizer(nextGen)
+                    speechRecognizer?.startListening(buildRecognizerIntent())
+                } else {
+                    applyState(if (currentText.isNotBlank()) State.HAS_TEXT else State.IDLE)
+                }
+            }
+
+            override fun onEndOfSpeech() {
+                if (gen != recognizerGeneration) return
+                if (!isListening) {
+                    applyState(if (currentText.isNotBlank()) State.HAS_TEXT else State.IDLE)
+                }
+            }
+
+            override fun onError(error: Int) {
+                if (gen != recognizerGeneration) return
+                if ((error == SpeechRecognizer.ERROR_NO_MATCH ||
+                     error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT) && isListening) {
+                    // Restart with fresh instance
+                    val nextGen = ++recognizerGeneration
+                    createFreshRecognizer(nextGen)
+                    speechRecognizer?.startListening(buildRecognizerIntent())
+                    return
+                }
+                isListening = false
+                setStatus("Error ${errorString(error)}")
+                applyState(if (currentText.isNotBlank()) State.HAS_TEXT else State.IDLE)
+            }
+        }
+
+        recognizer.setRecognitionListener(listener)
+        speechRecognizer = recognizer
     }
 
     private fun buildRecognizerIntent() = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
@@ -159,17 +223,16 @@ class DictationIME : InputMethodService(), RecognitionListener {
         if (isListening) return
         isListening = true
         recentTranscripts.clear()
-        // Create fresh recognizer each time to avoid Android replay bug
-        speechRecognizer?.destroy()
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
-        speechRecognizer?.setRecognitionListener(this)
+        val gen = ++recognizerGeneration
+        createFreshRecognizer(gen)
         speechRecognizer?.startListening(buildRecognizerIntent())
         applyState(State.LISTENING)
     }
 
     private fun stopListening() {
         isListening = false
-        speechRecognizer?.stopListening()
+        recognizerGeneration++  // invalidate any pending callbacks
+        try { speechRecognizer?.stopListening() } catch (_: Exception) {}
         applyState(if (currentText.isNotBlank()) State.HAS_TEXT else State.IDLE)
     }
 
@@ -178,34 +241,23 @@ class DictationIME : InputMethodService(), RecognitionListener {
     private fun processTranscript(raw: String): String? {
         val lower = raw.trim().lowercase()
 
-        // Check voice commands first (longest match first)
-        val sortedCmds = voiceCommands.keys.sortedByDescending { it.length }
-        for (cmd in sortedCmds) {
+        // Check voice commands (longest match first)
+        for (cmd in voiceCommands.keys.sortedByDescending { it.length }) {
             if (lower == cmd || lower.startsWith("$cmd ") || lower.endsWith(" $cmd")) {
                 executeVoiceCommand(voiceCommands[cmd]!!)
-                return null // consumed by command
+                return null
             }
         }
 
-        // Process punctuation within the text
+        // Process punctuation
         var result = raw.trim()
-        val sortedPunct = punctuationMap.keys.sortedByDescending { it.length }
-        for (spoken in sortedPunct) {
+        for (spoken in punctuationMap.keys.sortedByDescending { it.length }) {
             val regex = "\\b${Regex.escape(spoken)}\\b".toRegex(RegexOption.IGNORE_CASE)
-            result = regex.replace(result) { match ->
-                val punct = punctuationMap[spoken]!!
-                // If punctuation should attach to previous word (no leading space)
-                if (punct in listOf(",", ".", "?", "!", ":", ";", "...", "'")) {
-                    punct
-                } else {
-                    punct
-                }
-            }
+            result = regex.replace(result) { punctuationMap[spoken]!! }
         }
 
-        // Clean up spaces before punctuation
+        // Clean spaces before punctuation, ensure space after
         result = result.replace("\\s+([,\\.\\?!:;])".toRegex(), "$1")
-        // Ensure space after punctuation (except at end)
         result = result.replace("([,\\.\\?!:;])([A-Za-z])".toRegex(), "$1 $2")
 
         return result
@@ -233,7 +285,7 @@ class DictationIME : InputMethodService(), RecognitionListener {
             }
         }
         etPreview?.setText(currentText)
-        etPreview?.setSelection(currentText.length)
+        if (currentText.isNotEmpty()) etPreview?.setSelection(currentText.length)
         applyState(if (currentText.isNotBlank()) State.HAS_TEXT else State.IDLE)
     }
 
@@ -244,28 +296,22 @@ class DictationIME : InputMethodService(), RecognitionListener {
             if (isListening) stopListening() else startListening()
         }
         btnInsert?.setOnClickListener {
-            // Read from EditText (user may have edited)
-            val textToInsert = etPreview?.text?.toString() ?: currentText
-            currentInputConnection?.commitText(textToInsert, 1)
+            val text = etPreview?.text?.toString() ?: currentText
+            currentInputConnection?.commitText(text, 1)
             reset()
         }
         btnClean?.setOnClickListener {
-            val textToClean = etPreview?.text?.toString() ?: currentText
-            if (textToClean.isNotBlank()) cleanWithGroq(textToClean)
+            val text = etPreview?.text?.toString() ?: currentText
+            if (text.isNotBlank()) cleanWithGroq(text)
         }
         btnClear?.setOnClickListener { reset() }
         btnDeleteWord?.setOnClickListener {
-            // Delete last word from the preview (not the target field)
-            val text = etPreview?.text?.toString() ?: currentText
-            val newText = text.replace("\\s*\\S+\\s*$".toRegex(), "")
-            currentText = newText
-            etPreview?.setText(newText)
-            etPreview?.setSelection(newText.length)
-            applyState(if (newText.isNotBlank()) State.HAS_TEXT else State.IDLE)
+            currentText = currentText.replace("\\s*\\S+\\s*$".toRegex(), "")
+            etPreview?.setText(currentText)
+            if (currentText.isNotEmpty()) etPreview?.setSelection(currentText.length)
+            applyState(if (currentText.isNotBlank()) State.HAS_TEXT else State.IDLE)
         }
-        btnUndo?.setOnClickListener {
-            executeVoiceCommand("DELETE_LAST_CHUNK")
-        }
+        btnUndo?.setOnClickListener { executeVoiceCommand("DELETE_LAST_CHUNK") }
         btnSwitch?.setOnClickListener { switchToPreviousInputMethod() }
     }
 
@@ -372,78 +418,6 @@ class DictationIME : InputMethodService(), RecognitionListener {
     }
 
     private fun setStatus(msg: String) { tvStatus?.text = msg }
-
-    // ── RecognitionListener ────────────────────────────────────────────────
-
-    override fun onReadyForSpeech(params: Bundle?) = setStatus("🔴 Listening…")
-    override fun onBeginningOfSpeech() {}
-    override fun onRmsChanged(rmsdB: Float) {}
-    override fun onBufferReceived(buffer: ByteArray?) {}
-    override fun onEvent(eventType: Int, params: Bundle?) {}
-
-    override fun onPartialResults(partialResults: Bundle?) {
-        val partial = partialResults
-            ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-            ?.firstOrNull() ?: return
-        // Show partial in preview without committing
-        val display = if (currentText.isBlank()) "[$partial]"
-                      else "$currentText [$partial]"
-        etPreview?.setText(display)
-        etPreview?.setSelection(display.length)
-    }
-
-    override fun onResults(results: Bundle?) {
-        val result = results
-            ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-            ?.firstOrNull()?.trim() ?: return
-
-        // Deduplication — prevent Android from repeating the same result
-        val now = System.currentTimeMillis()
-        val key = result.lowercase()
-        val lastSeen = recentTranscripts[key]
-        if (lastSeen != null && now - lastSeen < DEDUP_MS) return
-        recentTranscripts[key] = now
-        recentTranscripts.entries.removeIf { now - it.value > DEDUP_MS }
-
-        // Process voice commands and punctuation
-        val processed = processTranscript(result)
-        if (processed != null) {
-            currentText += (if (currentText.isBlank()) "" else " ") + processed
-            etPreview?.setText(currentText)
-            etPreview?.setSelection(currentText.length)
-        }
-
-        // Auto-restart while still in listening mode (fresh instance)
-        if (isListening) {
-            speechRecognizer?.destroy()
-            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
-            speechRecognizer?.setRecognitionListener(this)
-            speechRecognizer?.startListening(buildRecognizerIntent())
-        } else {
-            applyState(State.HAS_TEXT)
-        }
-    }
-
-    override fun onEndOfSpeech() {
-        if (!isListening) applyState(if (currentText.isNotBlank()) State.HAS_TEXT else State.IDLE)
-    }
-
-    override fun onError(error: Int) {
-        if (error == SpeechRecognizer.ERROR_NO_MATCH ||
-            error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
-            if (isListening) {
-                // Fresh instance on restart
-                speechRecognizer?.destroy()
-                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
-                speechRecognizer?.setRecognitionListener(this)
-                speechRecognizer?.startListening(buildRecognizerIntent())
-                return
-            }
-        }
-        isListening = false
-        setStatus("Error ${errorString(error)}")
-        applyState(if (currentText.isNotBlank()) State.HAS_TEXT else State.IDLE)
-    }
 
     private fun errorString(code: Int) = when (code) {
         SpeechRecognizer.ERROR_AUDIO                  -> "audio recording"

@@ -4,24 +4,26 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="#0a0a1a"
-    android:padding="24dp">
+    android:padding="32dp"
+    android:background="#0a0a1a">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="🎙️"
-        android:textSize="52sp"
+    <!-- App Icon -->
+    <ImageView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/ic_launcher_foreground"
+        android:contentDescription="Smart Dictation"
         android:layout_marginBottom="12dp" />
 
+    <!-- Title -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Smart Dictation"
         android:textColor="#e2e8f0"
-        android:textSize="24sp"
+        android:textSize="26sp"
         android:textStyle="bold"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="4dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -31,18 +33,27 @@
         android:textSize="14sp"
         android:layout_marginBottom="32dp" />
 
-    <TextView
-        android:id="@+id/tv_step"
+    <!-- Step instructions -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text=""
-        android:textColor="#a5b4fc"
-        android:textSize="15sp"
-        android:gravity="center"
-        android:padding="16dp"
-        android:background="#1e1b4b"
-        android:layout_marginBottom="16dp" />
+        android:orientation="vertical"
+        android:background="#111128"
+        android:padding="20dp"
+        android:layout_marginBottom="24dp">
 
+        <TextView
+            android:id="@+id/tv_step"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Step 1 of 2: Grant microphone permission"
+            android:textColor="#e2e8f0"
+            android:textSize="14sp"
+            android:lineSpacingMultiplier="1.4"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <!-- Grant Mic -->
     <Button
         android:id="@+id/btn_grant_mic"
         android:layout_width="match_parent"
@@ -53,6 +64,7 @@
         android:textSize="15sp"
         android:layout_marginBottom="12dp" />
 
+    <!-- Enable Keyboard -->
     <Button
         android:id="@+id/btn_enable_keyboard"
         android:layout_width="match_parent"
@@ -60,6 +72,17 @@
         android:text="⚙️  Enable Keyboard in Settings"
         android:backgroundTint="#312e81"
         android:textColor="#ffffff"
+        android:textSize="15sp"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Open Website -->
+    <Button
+        android:id="@+id/btn_open_website"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="🌐  Open Smart Dictation Web App"
+        android:backgroundTint="#14532d"
+        android:textColor="#86efac"
         android:textSize="15sp" />
 
 </LinearLayout>

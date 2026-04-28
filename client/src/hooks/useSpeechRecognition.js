@@ -131,27 +131,20 @@ export function useSpeechRecognition(customPunctuationMap = {}) {
 
       if (finalTranscript) {
         const trimmed = finalTranscript.trim();
+        if (!trimmed) return;
 
-        // ── Deduplication: skip if seen this exact text within 4 seconds ──
+        // ── Deduplication: skip if seen this EXACT text within 4 seconds ──
         const now = Date.now();
         const key = trimmed.toLowerCase().replace(/\s+/g, ' ');
 
-        // Check exact match
         const lastSeen = recentTranscriptsRef.current.get(key);
-        if (lastSeen && now - lastSeen < 4000) return; // duplicate — skip
-
-        // Check if this is a substring of a recent transcript or vice versa
-        for (const [recentKey, recentTime] of recentTranscriptsRef.current.entries()) {
-          if (now - recentTime < 4000) {
-            if (recentKey.includes(key) || key.includes(recentKey)) return; // overlap — skip
-          }
-        }
+        if (lastSeen && now - lastSeen < 4000) return; // exact duplicate — skip
 
         recentTranscriptsRef.current.set(key, now);
 
         // Clean old entries
         for (const [k, t] of recentTranscriptsRef.current.entries()) {
-          if (now - t > 4000) recentTranscriptsRef.current.delete(k);
+          if (now - t > 5000) recentTranscriptsRef.current.delete(k);
         }
 
         // Check for voice commands
