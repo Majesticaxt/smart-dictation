@@ -3,9 +3,11 @@ package com.majesticaxt.smartdictation
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import android.webkit.PermissionRequest
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -36,7 +38,6 @@ class SetupActivity : AppCompatActivity() {
             startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
         }
         findViewById<Button>(R.id.btn_open_website).setOnClickListener {
-            // Show the WebView with the PWA
             showWebView()
         }
         updateUI()
@@ -58,10 +59,23 @@ class SetupActivity : AppCompatActivity() {
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             setSupportMultipleWindows(false)
             cacheMode = WebSettings.LOAD_DEFAULT
+            allowFileAccess = true
         }
 
         webView.webViewClient = WebViewClient()
-        webView.webChromeClient = WebChromeClient()
+
+        // Grant microphone permission to the WebView automatically
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onPermissionRequest(request: PermissionRequest?) {
+                request?.let {
+                    // Auto-grant audio/video permissions (user already granted mic to the app)
+                    runOnUiThread {
+                        it.grant(it.resources)
+                    }
+                }
+            }
+        }
+
         webView.loadUrl(PWA_URL)
     }
 

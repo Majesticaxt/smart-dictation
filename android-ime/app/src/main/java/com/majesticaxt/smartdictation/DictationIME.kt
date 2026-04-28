@@ -175,11 +175,19 @@ class DictationIME : InputMethodService() {
                     etPreview?.setSelection(currentText.length)
                 }
 
-                // Auto-restart with a FRESH instance
+                // Auto-restart with delay to avoid race condition
                 if (isListening) {
-                    val nextGen = ++recognizerGeneration
-                    createFreshRecognizer(nextGen)
-                    speechRecognizer?.startListening(buildRecognizerIntent())
+                    android.os.Handler(mainLooper).postDelayed({
+                        if (isListening) {
+                            try {
+                                val nextGen = ++recognizerGeneration
+                                createFreshRecognizer(nextGen)
+                                speechRecognizer?.startListening(buildRecognizerIntent())
+                            } catch (e: Exception) {
+                                setStatus("⚠️ Restarting…")
+                            }
+                        }
+                    }, 300)
                 } else {
                     applyState(if (currentText.isNotBlank()) State.HAS_TEXT else State.IDLE)
                 }
@@ -195,11 +203,20 @@ class DictationIME : InputMethodService() {
             override fun onError(error: Int) {
                 if (gen != recognizerGeneration) return
                 if ((error == SpeechRecognizer.ERROR_NO_MATCH ||
-                     error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT) && isListening) {
-                    // Restart with fresh instance
-                    val nextGen = ++recognizerGeneration
-                    createFreshRecognizer(nextGen)
-                    speechRecognizer?.startListening(buildRecognizerIntent())
+                     error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT ||
+                     error == SpeechRecognizer.ERROR_CLIENT) && isListening) {
+                    // Restart with delay
+                    android.os.Handler(mainLooper).postDelayed({
+                        if (isListening) {
+                            try {
+                                val nextGen = ++recognizerGeneration
+                                createFreshRecognizer(nextGen)
+                                speechRecognizer?.startListening(buildRecognizerIntent())
+                            } catch (e: Exception) {
+                                setStatus("⚠️ Restarting…")
+                            }
+                        }
+                    }, 300)
                     return
                 }
                 isListening = false
