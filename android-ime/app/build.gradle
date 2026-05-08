@@ -14,9 +14,6 @@ android {
         versionCode 4
         versionName "1.3"
 
-        // Custom APK name
-        setProperty("archivesBaseName", "SmartDictation")
-
         def groqKey = System.getenv("GROQ_API_KEY") ?: project.findProperty("GROQ_API_KEY") ?: ""
         buildConfigField "String", "GROQ_API_KEY", "\"${groqKey}\""
     }
@@ -48,6 +45,13 @@ android {
 
     kotlinOptions {
         jvmTarget = '17'
+    }
+
+    // Rename APK output file
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "SmartDictation-${variant.buildType.name}.apk"
+        }
     }
 }
 
