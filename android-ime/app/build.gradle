@@ -11,8 +11,11 @@ android {
         applicationId "com.majesticaxt.smartdictation"
         minSdk 26
         targetSdk 34
-        versionCode 3
-        versionName "1.2"
+        versionCode 4
+        versionName "1.3"
+
+        // Custom APK name
+        setProperty("archivesBaseName", "SmartDictation")
 
         def groqKey = System.getenv("GROQ_API_KEY") ?: project.findProperty("GROQ_API_KEY") ?: ""
         buildConfigField "String", "GROQ_API_KEY", "\"${groqKey}\""
