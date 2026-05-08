@@ -11,8 +11,8 @@ android {
         applicationId "com.majesticaxt.smartdictation"
         minSdk 26
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.2"
 
         def groqKey = System.getenv("GROQ_API_KEY") ?: project.findProperty("GROQ_API_KEY") ?: ""
         buildConfigField "String", "GROQ_API_KEY", "\"${groqKey}\""
@@ -22,9 +22,19 @@ android {
         buildConfig true
     }
 
+    signingConfigs {
+        debug {
+            // Use default debug keystore — consistent across builds
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
         release {
             minifyEnabled false
+            signingConfig signingConfigs.debug  // Use debug signing for now
         }
     }
 

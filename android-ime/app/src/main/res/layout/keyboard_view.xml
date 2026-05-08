@@ -11,7 +11,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:background="#111128"
+        android:background="@drawable/preview_bg"
         android:padding="2dp">
         <EditText
             android:id="@+id/et_preview"
@@ -40,14 +40,14 @@
         android:gravity="center"
         android:paddingVertical="4dp" />
 
-    <!-- Microphone button — large and centered -->
+    <!-- Microphone button — large and centered with rounded shape -->
     <ImageButton
         android:id="@+id/btn_mic"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginVertical="4dp"
-        android:background="#312e81"
+        android:background="@drawable/btn_mic_bg"
         android:src="@android:drawable/ic_btn_speak_now"
         android:contentDescription="Microphone"
         android:scaleType="centerInside"
@@ -56,7 +56,7 @@
     <!-- Main action buttons row -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="42dp"
+        android:layout_height="44dp"
         android:orientation="horizontal"
         android:layout_marginTop="4dp">
 
@@ -67,9 +67,9 @@
             android:layout_weight="1"
             android:text="✨ Clean"
             android:textSize="12sp"
-            android:backgroundTint="#312e81"
+            android:background="@drawable/btn_purple_rounded"
             android:textColor="#a5b4fc"
-            android:layout_marginEnd="3dp" />
+            android:layout_marginEnd="4dp" />
 
         <Button
             android:id="@+id/btn_insert"
@@ -78,7 +78,7 @@
             android:layout_weight="1"
             android:text="✅ Insert"
             android:textSize="12sp"
-            android:backgroundTint="#14532d"
+            android:background="@drawable/btn_green_rounded"
             android:textColor="#86efac" />
 
     </LinearLayout>
@@ -86,9 +86,9 @@
     <!-- Secondary action buttons row -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="36dp"
+        android:layout_height="38dp"
         android:orientation="horizontal"
-        android:layout_marginTop="3dp">
+        android:layout_marginTop="4dp">
 
         <Button
             android:id="@+id/btn_switch"
@@ -97,7 +97,7 @@
             android:layout_weight="1"
             android:text="⌨️"
             android:textSize="14sp"
-            android:backgroundTint="#1e1b4b"
+            android:background="@drawable/btn_dark_rounded"
             android:textColor="#94a3b8"
             android:layout_marginEnd="3dp" />
 
@@ -108,7 +108,7 @@
             android:layout_weight="1.5"
             android:text="⌫ Word"
             android:textSize="11sp"
-            android:backgroundTint="#1e1b4b"
+            android:background="@drawable/btn_dark_rounded"
             android:textColor="#94a3b8"
             android:layout_marginEnd="3dp" />
 
@@ -119,7 +119,7 @@
             android:layout_weight="1"
             android:text="↩ Undo"
             android:textSize="11sp"
-            android:backgroundTint="#1e1b4b"
+            android:background="@drawable/btn_dark_rounded"
             android:textColor="#94a3b8"
             android:layout_marginEnd="3dp" />
 
@@ -130,7 +130,7 @@
             android:layout_weight="1"
             android:text="Clear"
             android:textSize="11sp"
-            android:backgroundTint="#7f1d1d"
+            android:background="@drawable/btn_red_rounded"
             android:textColor="#fca5a5" />
 
     </LinearLayout>

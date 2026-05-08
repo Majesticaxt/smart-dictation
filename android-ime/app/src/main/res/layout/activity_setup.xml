@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="#0a0a1a">
 
-    <!-- Setup Screen -->
+    <!-- ═══ SETUP SCREEN (only shown when not configured) ═══ -->
     <LinearLayout
         android:id="@+id/setup_layout"
         android:layout_width="match_parent"
@@ -42,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#111128"
+            android:background="@drawable/preview_bg"
             android:padding="20dp"
             android:layout_marginBottom="24dp">
 
@@ -62,9 +62,9 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:text="🎤  Grant Microphone Permission"
-            android:backgroundTint="#4f46e5"
+            android:background="@drawable/btn_purple_rounded"
             android:textColor="#ffffff"
-            android:textSize="15sp"
+            android:textSize="14sp"
             android:layout_marginBottom="12dp" />
 
         <Button
@@ -72,23 +72,122 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:text="⚙️  Enable Keyboard in Settings"
-            android:backgroundTint="#312e81"
-            android:textColor="#ffffff"
-            android:textSize="15sp"
+            android:background="@drawable/btn_dark_rounded"
+            android:textColor="#a5b4fc"
+            android:textSize="14sp"
             android:layout_marginBottom="12dp" />
 
         <Button
             android:id="@+id/btn_open_website"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:text="🌐  Open Smart Dictation Dashboard"
-            android:backgroundTint="#14532d"
+            android:text="🌐  Open Dashboard"
+            android:background="@drawable/btn_green_rounded"
             android:textColor="#86efac"
-            android:textSize="15sp" />
-
+            android:textSize="14sp" />
     </LinearLayout>
 
-    <!-- Embedded WebView for PWA -->
+    <!-- ═══ HOME SCREEN (shown when fully configured) ═══ -->
+    <LinearLayout
+        android:id="@+id/home_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/ic_launcher_foreground"
+            android:contentDescription="Smart Dictation"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Smart Dictation"
+            android:textColor="#e2e8f0"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AI-powered voice keyboard"
+            android:textColor="#64748b"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Status badge -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_green_rounded"
+            android:padding="10dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_marginBottom="40dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✅ Keyboard Active"
+                android:textColor="#86efac"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Instructions -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/preview_bg"
+            android:padding="20dp"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="How to use:"
+                android:textColor="#a5b4fc"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1. Open any app (WhatsApp, Notes, etc.)\n2. Tap the text input field\n3. Switch to Smart Dictation keyboard\n4. Tap the mic button and start speaking!"
+                android:textColor="#94a3b8"
+                android:textSize="13sp"
+                android:lineSpacingMultiplier="1.5" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_home_dashboard"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="🌐  Open Web Dashboard"
+            android:background="@drawable/btn_purple_rounded"
+            android:textColor="#ffffff"
+            android:textSize="14sp"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btn_home_settings"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="⚙️  Keyboard Settings"
+            android:background="@drawable/btn_dark_rounded"
+            android:textColor="#a5b4fc"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- ═══ WEBVIEW ═══ -->
     <WebView
         android:id="@+id/webview"
         android:layout_width="match_parent"
