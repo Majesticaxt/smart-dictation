@@ -4,194 +4,309 @@
     android:layout_height="match_parent"
     android:background="#0a0a1a">
 
-    <!-- ═══ SETUP SCREEN (only shown when not configured) ═══ -->
-    <LinearLayout
+    <!-- ═══ SETUP SCREEN (first launch only) ═══ -->
+    <ScrollView
         android:id="@+id/setup_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="32dp"
-        android:visibility="visible">
-
-        <ImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/ic_launcher_foreground"
-            android:contentDescription="Smart Dictation"
-            android:layout_marginBottom="12dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Smart Dictation"
-            android:textColor="#e2e8f0"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="AI-powered voice keyboard"
-            android:textColor="#64748b"
-            android:textSize="14sp"
-            android:layout_marginBottom="32dp" />
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/preview_bg"
-            android:padding="20dp"
-            android:layout_marginBottom="24dp">
+            android:gravity="center_horizontal"
+            android:padding="32dp">
 
-            <TextView
-                android:id="@+id/tv_step"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Step 1 of 2: Grant microphone permission"
-                android:textColor="#e2e8f0"
-                android:textSize="14sp"
-                android:lineSpacingMultiplier="1.4"
-                android:gravity="center" />
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/btn_grant_mic"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:text="🎤  Grant Microphone Permission"
-            android:background="@drawable/btn_purple_rounded"
-            android:textColor="#ffffff"
-            android:textSize="14sp"
-            android:layout_marginBottom="12dp" />
-
-        <Button
-            android:id="@+id/btn_enable_keyboard"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:text="⚙️  Enable Keyboard in Settings"
-            android:background="@drawable/btn_dark_rounded"
-            android:textColor="#a5b4fc"
-            android:textSize="14sp"
-            android:layout_marginBottom="12dp" />
-
-        <Button
-            android:id="@+id/btn_open_website"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:text="🌐  Open Dashboard"
-            android:background="@drawable/btn_green_rounded"
-            android:textColor="#86efac"
-            android:textSize="14sp" />
-    </LinearLayout>
-
-    <!-- ═══ HOME SCREEN (shown when fully configured) ═══ -->
-    <LinearLayout
-        android:id="@+id/home_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="32dp"
-        android:visibility="gone">
-
-        <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@drawable/ic_launcher_foreground"
-            android:contentDescription="Smart Dictation"
-            android:layout_marginBottom="16dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Smart Dictation"
-            android:textColor="#e2e8f0"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="AI-powered voice keyboard"
-            android:textColor="#64748b"
-            android:textSize="14sp"
-            android:layout_marginBottom="8dp" />
-
-        <!-- Status badge -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/btn_green_rounded"
-            android:padding="10dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:layout_marginBottom="40dp">
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/ic_launcher_foreground"
+                android:contentDescription="Smart Dictation"
+                android:layout_marginBottom="12dp"
+                android:layout_marginTop="40dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="✅ Keyboard Active"
-                android:textColor="#86efac"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+                android:text="Smart Dictation"
+                android:textColor="#e2e8f0"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp" />
 
-        <!-- Instructions -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AI-powered voice keyboard"
+                android:textColor="#64748b"
+                android:textSize="14sp"
+                android:layout_marginBottom="32dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/preview_bg"
+                android:padding="20dp"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:id="@+id/tv_step"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Step 1 of 2: Grant microphone permission"
+                    android:textColor="#e2e8f0"
+                    android:textSize="14sp"
+                    android:lineSpacingMultiplier="1.4"
+                    android:gravity="center" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_grant_mic"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="🎤  Grant Microphone Permission"
+                android:background="@drawable/btn_purple_rounded"
+                android:textColor="#ffffff"
+                android:textSize="14sp"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btn_enable_keyboard"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="⚙️  Enable Keyboard in Settings"
+                android:background="@drawable/btn_dark_rounded"
+                android:textColor="#a5b4fc"
+                android:textSize="14sp"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btn_finish_setup"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="✅  Done — Go to Dashboard"
+                android:background="@drawable/btn_green_rounded"
+                android:textColor="#86efac"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- ═══ NATIVE DASHBOARD (main screen) ═══ -->
+    <ScrollView
+        android:id="@+id/dashboard_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/preview_bg"
-            android:padding="20dp"
-            android:layout_marginBottom="24dp">
+            android:padding="20dp">
 
-            <TextView
+            <!-- Header -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="How to use:"
-                android:textColor="#a5b4fc"
-                android:textSize="14sp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="16dp">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_launcher_foreground"
+                    android:contentDescription="Logo"
+                    android:layout_marginEnd="12dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Smart Dictation"
+                        android:textColor="#e2e8f0"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_status_badge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="✅ Keyboard Active"
+                        android:textColor="#86efac"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btn_reconfigure"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="⚙️"
+                    android:textSize="16sp"
+                    android:background="@drawable/btn_dark_rounded"
+                    android:textColor="#94a3b8"
+                    android:minWidth="44dp" />
+            </LinearLayout>
+
+            <!-- Stats Cards -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📊 Your Stats"
+                android:textColor="#e2e8f0"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="10dp" />
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="1. Open any app (WhatsApp, Notes, etc.)\n2. Tap the text input field\n3. Switch to Smart Dictation keyboard\n4. Tap the mic button and start speaking!"
-                android:textColor="#94a3b8"
-                android:textSize="13sp"
-                android:lineSpacingMultiplier="1.5" />
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="@drawable/preview_bg"
+                    android:padding="16dp"
+                    android:gravity="center"
+                    android:layout_marginEnd="6dp">
+
+                    <TextView
+                        android:id="@+id/tv_stat_dictations"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#a5b4fc"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="DICTATIONS"
+                        android:textColor="#64748b"
+                        android:textSize="10sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="@drawable/preview_bg"
+                    android:padding="16dp"
+                    android:gravity="center"
+                    android:layout_marginStart="6dp">
+
+                    <TextView
+                        android:id="@+id/tv_stat_words"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#a5b4fc"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="WORDS"
+                        android:textColor="#64748b"
+                        android:textSize="10sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- How to Use -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🚀 How to Use"
+                android:textColor="#e2e8f0"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="10dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/preview_bg"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="1. Open any app (WhatsApp, Notes, etc.)\n2. Tap a text input field\n3. Switch to Smart Dictation keyboard\n4. Tap the 🎤 mic button and speak!\n5. Edit your text, then tap Insert"
+                    android:textColor="#94a3b8"
+                    android:textSize="14sp"
+                    android:lineSpacingMultiplier="1.6" />
+            </LinearLayout>
+
+            <!-- Voice Commands -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💬 Voice Commands"
+                android:textColor="#e2e8f0"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="10dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/preview_bg"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🗑️ \"scratch that\" → Delete last phrase\n🗑️ \"delete last word\" → Delete last word\n↩️ \"undo\" → Undo last 5 words\n🗑️ \"clear all\" → Clear everything\n, \"comma\" → Insert ,\n. \"full stop\" → Insert .\n? \"question mark\" → Insert ?\n⏎ \"new line\" → Line break"
+                    android:textColor="#94a3b8"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.6" />
+            </LinearLayout>
+
+            <!-- Actions -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="40dp">
+
+                <Button
+                    android:id="@+id/btn_keyboard_settings"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="⚙️  Keyboard Settings"
+                    android:background="@drawable/btn_dark_rounded"
+                    android:textColor="#a5b4fc"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp" />
+
+                <Button
+                    android:id="@+id/btn_switch_keyboard"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="⌨️  Switch Input Method"
+                    android:background="@drawable/btn_dark_rounded"
+                    android:textColor="#94a3b8"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
         </LinearLayout>
-
-        <Button
-            android:id="@+id/btn_home_dashboard"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:text="🌐  Open Web Dashboard"
-            android:background="@drawable/btn_purple_rounded"
-            android:textColor="#ffffff"
-            android:textSize="14sp"
-            android:layout_marginBottom="12dp" />
-
-        <Button
-            android:id="@+id/btn_home_settings"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:text="⚙️  Keyboard Settings"
-            android:background="@drawable/btn_dark_rounded"
-            android:textColor="#a5b4fc"
-            android:textSize="14sp" />
-    </LinearLayout>
-
-    <!-- ═══ WEBVIEW ═══ -->
-    <WebView
-        android:id="@+id/webview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
+    </ScrollView>
 
 </FrameLayout>

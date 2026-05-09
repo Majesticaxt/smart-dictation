@@ -1,5 +1,6 @@
 package com.majesticaxt.smartdictation
 
+import android.content.Context
 import android.content.Intent
 import android.inputmethodservice.InputMethodService
 import android.os.Bundle
@@ -318,7 +319,10 @@ class DictationIME : InputMethodService() {
         }
         btnInsert?.setOnClickListener {
             val text = etPreview?.text?.toString() ?: currentText
-            currentInputConnection?.commitText(text, 1)
+            if (text.isNotBlank()) {
+                currentInputConnection?.commitText(text, 1)
+                trackStats(text)
+            }
             reset()
         }
         btnClean?.setOnClickListener {
@@ -447,5 +451,19 @@ class DictationIME : InputMethodService() {
         SpeechRecognizer.ERROR_NETWORK_TIMEOUT        -> "network timeout"
         SpeechRecognizer.ERROR_SERVER                 -> "server"
         else                                          -> "($code)"
+    }
+
+    // ── Stats tracking ─────────────────────────────────────────────────────
+
+    private fun trackStats(text: String) {
+        val prefs = getSharedPreferences("smart_dictation_prefs", Context.MODE_PRIVATE)
+        val dictations = prefs.getInt("stat_dictations", 0)
+        val words = prefs.getInt("stat_words", 0)
+        val wordCount = text.trim().split("\\s+".toRegex()).size
+
+        prefs.edit()
+            .putInt("stat_dictations", dictations + 1)
+            .putInt("stat_words", words + wordCount)
+            .apply()
     }
 }
