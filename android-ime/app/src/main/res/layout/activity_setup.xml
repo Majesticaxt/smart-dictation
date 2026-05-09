@@ -246,7 +246,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="1. Open any app (WhatsApp, Notes, etc.)\n2. Tap a text input field\n3. Switch to Smart Dictation keyboard\n4. Tap the 🎤 mic button and speak!\n5. Edit your text, then tap Insert"
+                    android:text="@string/how_to_use_text"
                     android:textColor="#94a3b8"
                     android:textSize="14sp"
                     android:lineSpacingMultiplier="1.6" />
@@ -273,7 +273,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="🗑️ \"scratch that\" → Delete last phrase\n🗑️ \"delete last word\" → Delete last word\n↩️ \"undo\" → Undo last 5 words\n🗑️ \"clear all\" → Clear everything\n, \"comma\" → Insert ,\n. \"full stop\" → Insert .\n? \"question mark\" → Insert ?\n⏎ \"new line\" → Line break"
+                    android:text="@string/voice_commands_text"
                     android:textColor="#94a3b8"
                     android:textSize="13sp"
                     android:lineSpacingMultiplier="1.6" />

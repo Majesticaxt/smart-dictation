@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Smart Dictation</string>
+    <string name="voice_commands_text">🗑️ \"scratch that\" → Delete last phrase\n🗑️ \"delete last word\" → Delete last word\n↩️ \"undo\" → Undo last 5 words\n🗑️ \"clear all\" → Clear everything\n, \"comma\" → Insert comma\n. \"full stop\" → Insert period\n? \"question mark\" → Insert ?\n⏎ \"new line\" → Line break</string>
+    <string name="how_to_use_text">1. Open any app (WhatsApp, Notes, etc.)\n2. Tap a text input field\n3. Switch to Smart Dictation keyboard\n4. Tap the 🎤 mic button and speak!\n5. Edit your text, then tap Insert</string>
 </resources>
