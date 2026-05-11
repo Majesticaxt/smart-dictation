@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import LandingPage from './components/LandingPage';
 import RecordingPanel from './components/RecordingPanel';
 import TextEditor from './components/TextEditor';
 import ActionBar from './components/ActionBar';
@@ -20,7 +21,7 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [corrections, setCorrections] = useState([]);
   const [notification, setNotification] = useState('');
-  const [activeTab, setActiveTab] = useState('dictate'); // 'dictate' | 'dashboard'
+  const [activeTab, setActiveTab] = useState('landing'); // 'landing' | 'dictate' | 'dashboard'
 
   // Hooks
   const {
@@ -174,45 +175,58 @@ export default function App() {
       <div className="bg-gradient" />
       <div className="bg-grid" />
 
-      {/* Header */}
-      <header className="app-header">
-        <div className="header-left">
-          <h1 className="app-title">
-            <span className="title-icon">🎙️</span>
-            Smart Dictation
-          </h1>
-          <span className="app-badge">AI-Powered</span>
-        </div>
-        <button
-          id="settings-btn"
-          className="settings-trigger"
-          onClick={() => setSettingsOpen(true)}
-          title="Settings"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-        </button>
-      </header>
+      {/* Landing Page — shown first */}
+      {activeTab === 'landing' && (
+        <LandingPage onOpenApp={(tab) => setActiveTab(tab)} />
+      )}
 
-      {/* Mobile Tab Navigation */}
-      <nav className="mobile-tabs">
-        <button
-          className={`mobile-tab ${activeTab === 'dictate' ? 'mobile-tab--active' : ''}`}
-          onClick={() => setActiveTab('dictate')}
-        >
-          <span className="mobile-tab-icon">🎤</span>
-          <span>Dictate</span>
-        </button>
-        <button
-          className={`mobile-tab ${activeTab === 'dashboard' ? 'mobile-tab--active' : ''}`}
-          onClick={() => setActiveTab('dashboard')}
-        >
-          <span className="mobile-tab-icon">📊</span>
-          <span>Dashboard</span>
-        </button>
-      </nav>
+      {/* App views (dictate/dashboard) */}
+      {activeTab !== 'landing' && (
+        <>
+          {/* Header */}
+          <header className="app-header">
+            <div className="header-left">
+              <button className="landing-back-btn" onClick={() => setActiveTab('landing')} title="Back to home">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              </button>
+              <h1 className="app-title">
+                <span className="title-icon">🎙️</span>
+                Smart Dictation
+              </h1>
+              <span className="app-badge">AI-Powered</span>
+            </div>
+            <button
+              id="settings-btn"
+              className="settings-trigger"
+              onClick={() => setSettingsOpen(true)}
+              title="Settings"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </header>
+
+          {/* Bottom Tab Navigation */}
+          <nav className="mobile-tabs">
+            <button
+              className={`mobile-tab ${activeTab === 'dictate' ? 'mobile-tab--active' : ''}`}
+              onClick={() => setActiveTab('dictate')}
+            >
+              <span className="mobile-tab-icon">🎤</span>
+              <span>Dictate</span>
+            </button>
+            <button
+              className={`mobile-tab ${activeTab === 'dashboard' ? 'mobile-tab--active' : ''}`}
+              onClick={() => setActiveTab('dashboard')}
+            >
+              <span className="mobile-tab-icon">📊</span>
+              <span>Dashboard</span>
+            </button>
+          </nav>
+        </>
+      )}
 
       {/* Main Content — Dictate Tab */}
       {activeTab === 'dictate' && (
