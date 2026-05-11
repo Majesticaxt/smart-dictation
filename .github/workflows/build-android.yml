@@ -33,8 +33,23 @@ jobs:
           mkdir -p android-ime/app/src/main/res/mipmap-xxxhdpi
           cp client/public/icon-512.png android-ime/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
           cp client/public/icon-512.png android-ime/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
-          # Remove adaptive icon overrides so PNG is used
           rm -rf android-ime/app/src/main/res/mipmap-anydpi-v26
+
+      - name: Create persistent signing keystore
+        run: |
+          KEYSTORE_PATH="$HOME/.android/debug.keystore"
+          mkdir -p "$HOME/.android"
+          # Generate a deterministic debug keystore so every build produces
+          # the same signature — this prevents "app conflicts" on updates
+          keytool -genkeypair \
+            -alias androiddebugkey \
+            -keypass android \
+            -keystore "$KEYSTORE_PATH" \
+            -storepass android \
+            -dname "CN=Smart Dictation,OU=Dev,O=Majesticaxt,L=Lagos,S=Lagos,C=NG" \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4

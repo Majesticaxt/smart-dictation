@@ -25,6 +25,37 @@
   --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ===== Animations ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 8px var(--accent-glow); }
+  50% { box-shadow: 0 0 24px var(--accent-glow), 0 0 48px rgba(99, 102, 241, 0.15); }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
 /* ===== Reset & Base ===== */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -115,6 +146,7 @@ body {
   border-radius: var(--radius-full);
   background: linear-gradient(135deg, var(--accent), #a78bfa);
   color: white;
+  animation: fadeIn 0.8s ease-out;
 }
 
 .settings-trigger {
@@ -157,7 +189,19 @@ body {
   border-radius: var(--radius-lg);
   backdrop-filter: blur(12px);
   padding: 24px;
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+.recording-panel { animation-delay: 0.1s; }
+.text-editor { animation-delay: 0.2s; }
+.action-bar { animation-delay: 0.3s; }
+
+.recording-panel:hover,
+.text-editor:hover,
+.action-bar:hover {
+  border-color: var(--border-active);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.05);
 }
 
 /* ===== Recording Panel ===== */
@@ -947,6 +991,18 @@ body {
   border-radius: var(--radius-lg);
   backdrop-filter: blur(12px);
   padding: 24px;
+  animation: fadeInUp 0.5s ease-out both;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.dash-section:nth-child(1) { animation-delay: 0.1s; }
+.dash-section:nth-child(2) { animation-delay: 0.2s; }
+.dash-section:nth-child(3) { animation-delay: 0.3s; }
+.dash-section:nth-child(4) { animation-delay: 0.4s; }
+
+.dash-section:hover {
+  border-color: var(--border-active);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.05);
 }
 
 .dash-section-title {
@@ -985,6 +1041,14 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.dash-stat-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
 }
 
 .dash-stat-value {

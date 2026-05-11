@@ -43,6 +43,8 @@ class DictationIME : InputMethodService() {
     private var btnDeleteWord: Button? = null
     private var btnSwitch: Button? = null
     private var btnUndo: Button? = null
+    private var btnEnter: Button? = null
+    private var btnBackspace: Button? = null
 
     // ── Resources ──────────────────────────────────────────────────────────
     private var speechRecognizer: SpeechRecognizer? = null
@@ -92,6 +94,8 @@ class DictationIME : InputMethodService() {
         btnDeleteWord = view.findViewById(R.id.btn_delete_word)
         btnSwitch     = view.findViewById(R.id.btn_switch)
         btnUndo       = view.findViewById(R.id.btn_undo)
+        btnEnter      = view.findViewById(R.id.btn_enter)
+        btnBackspace  = view.findViewById(R.id.btn_backspace)
 
         // Sync EditText → currentText
         etPreview?.addTextChangedListener(object : TextWatcher {
@@ -338,6 +342,31 @@ class DictationIME : InputMethodService() {
         }
         btnUndo?.setOnClickListener { executeVoiceCommand("DELETE_LAST_CHUNK") }
         btnSwitch?.setOnClickListener { switchToPreviousInputMethod() }
+
+        // Enter — add newline to preview or send to target
+        btnEnter?.setOnClickListener {
+            if (currentText.isNotBlank()) {
+                currentText += "\n"
+                etPreview?.setText(currentText)
+                etPreview?.setSelection(currentText.length)
+            } else {
+                // No text in preview — send Enter directly to the target app
+                currentInputConnection?.commitText("\n", 1)
+            }
+        }
+
+        // Backspace — delete last character
+        btnBackspace?.setOnClickListener {
+            if (currentText.isNotEmpty()) {
+                currentText = currentText.dropLast(1)
+                etPreview?.setText(currentText)
+                if (currentText.isNotEmpty()) etPreview?.setSelection(currentText.length)
+                applyState(if (currentText.isNotBlank()) State.HAS_TEXT else State.IDLE)
+            } else {
+                // No text in preview — delete from target app
+                currentInputConnection?.deleteSurroundingText(1, 0)
+            }
+        }
     }
 
     private fun reset() {
