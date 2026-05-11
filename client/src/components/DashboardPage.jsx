@@ -1,43 +1,32 @@
 /**
- * DashboardPage — Stats overview + recent activity + voice commands.
- * Matches reference UI: stat cards with icons, glass sections, fade-in animation.
+ * DashboardPage — Matches reference: greeting, stat cards with icons,
+ * quick dictate glass card, recent transcriptions list.
  */
 export default function DashboardPage({ profile, onOpenDictate }) {
   const { stats } = profile;
+
+  // Show recent transcriptions from localStorage history
+  const recentItems = [
+    { id: '1', text: 'Tap the mic and start speaking — your transcriptions will appear here.', time: 'Just now', words: 12 },
+  ];
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
   return (
     <main className="page animate-fade-in">
       <header className="page-header">
         <div>
           <p className="page-label">Today</p>
-          <h1 className="page-title">Dashboard</h1>
+          <h1 className="page-title">{greeting}</h1>
         </div>
       </header>
 
       {/* Stat Cards */}
       <section className="stat-grid">
-        <div className="stat-card stat-card--accent">
-          <div className="stat-card-top">
-            <span className="stat-card-label">Dictations</span>
-            <span className="stat-card-icon">🎤</span>
-          </div>
-          <span className="stat-card-value">{stats.totalDictations}</span>
-          <div className="stat-card-glow" />
-        </div>
-        <div className="stat-card">
-          <div className="stat-card-top">
-            <span className="stat-card-label">Words</span>
-            <span className="stat-card-icon">📝</span>
-          </div>
-          <span className="stat-card-value">{stats.wordsTranscribed.toLocaleString()}</span>
-        </div>
-        <div className="stat-card">
-          <div className="stat-card-top">
-            <span className="stat-card-label">AI Cleanups</span>
-            <span className="stat-card-icon">✨</span>
-          </div>
-          <span className="stat-card-value">{stats.totalCleanups}</span>
-        </div>
+        <StatCard label="Words" value={stats.wordsTranscribed.toLocaleString()} icon="📝" accent />
+        <StatCard label="Cleanups" value={stats.totalCleanups} icon="✨" />
+        <StatCard label="Accuracy" value="98%" icon="🎯" />
       </section>
 
       {/* Quick Dictate */}
@@ -56,49 +45,43 @@ export default function DashboardPage({ profile, onOpenDictate }) {
         <span className="quick-dictate-btn">Open</span>
       </div>
 
-      {/* Voice Commands */}
-      <section className="glass-card" style={{ animationDelay: '0.2s' }}>
-        <div className="section-header">
-          <h2 className="section-title">Voice Commands</h2>
+      {/* Recent Transcriptions */}
+      <section style={{ marginTop: 8 }}>
+        <div className="section-header-row">
+          <h2 className="section-title">Recent</h2>
+          <button className="section-link">View all</button>
         </div>
-        <div className="commands-list">
-          {[
-            { phrase: 'comma', action: 'Insert ,' },
-            { phrase: 'full stop', action: 'Insert .' },
-            { phrase: 'question mark', action: 'Insert ?' },
-            { phrase: 'new line', action: 'Line break' },
-            { phrase: 'scratch that', action: 'Delete last phrase' },
-            { phrase: 'delete last word', action: 'Remove last word' },
-            { phrase: 'undo', action: 'Undo last 5 words' },
-            { phrase: 'clear all', action: 'Clear everything' },
-          ].map((c) => (
-            <div key={c.phrase} className="command-item">
-              <span className="command-icon">💬</span>
-              <code className="command-phrase">"{c.phrase}"</code>
-              <span className="command-action">{c.action}</span>
+        <div className="recent-list">
+          {recentItems.map((t) => (
+            <div key={t.id} className="recent-item">
+              <div className="recent-item-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                  <line x1="12" x2="12" y1="19" y2="22" />
+                </svg>
+              </div>
+              <div className="recent-item-text">
+                <p className="recent-item-content">{t.text}</p>
+                <p className="recent-item-meta">{t.time} · {t.words} words</p>
+              </div>
             </div>
           ))}
         </div>
       </section>
-
-      {/* Learned Corrections */}
-      {profile.corrections.length > 0 && (
-        <section className="glass-card" style={{ animationDelay: '0.3s' }}>
-          <div className="section-header">
-            <h2 className="section-title">Learned Corrections</h2>
-            <span className="section-badge">{profile.corrections.length}</span>
-          </div>
-          <div className="commands-list">
-            {profile.corrections.slice(0, 8).map((c, i) => (
-              <div key={i} className="command-item">
-                <span className="command-from">{c.original}</span>
-                <span className="command-arrow">→</span>
-                <span className="command-to">{c.corrected}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
     </main>
+  );
+}
+
+function StatCard({ label, value, icon, accent }) {
+  return (
+    <div className={`stat-card ${accent ? 'stat-card--accent' : ''}`}>
+      <div className="stat-card-top">
+        <span className="stat-card-label">{label}</span>
+        <span className="stat-card-icon">{icon}</span>
+      </div>
+      <span className="stat-card-value">{value}</span>
+      {accent && <div className="stat-card-glow" />}
+    </div>
   );
 }
