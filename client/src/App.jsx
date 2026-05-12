@@ -16,6 +16,20 @@ import { detectCorrections } from './utils/diffDetector';
 
 const MicIcon = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>;
 
+// ── URL ↔ Tab routing ──
+const ROUTES = {
+  '/': 'landing',
+  '/dictate': 'dictate',
+  '/dashboard': 'dashboard',
+  '/settings': 'settings',
+  '/profile': 'profile',
+};
+const TAB_TO_PATH = Object.fromEntries(Object.entries(ROUTES).map(([k, v]) => [v, k]));
+function getTabFromURL() {
+  const path = window.location.pathname;
+  return ROUTES[path] || 'landing';
+}
+
 export default function App() {
   const [text, setText] = useState('');
   const [previousText, setPreviousText] = useState('');
@@ -23,7 +37,7 @@ export default function App() {
   const [advancedSettingsOpen, setAdvancedSettingsOpen] = useState(false);
   const [corrections, setCorrections] = useState([]);
   const [notification, setNotification] = useState('');
-  const [activeTab, setActiveTab] = useState('landing');
+  const [activeTab, setActiveTab] = useState(getTabFromURL);
 
   const {
     profile, addCorrection, removeCorrection, addFillerWord, removeFillerWord,
@@ -104,8 +118,23 @@ export default function App() {
 
   const profileActions = { addCorrection, removeCorrection, addFillerWord, removeFillerWord, addVocabulary, removeVocabulary, addPunctuationAlias, removePunctuationAlias, handleExport, handleImport, handleReset };
 
+  // ── Sync URL with tab ──
+  const navigate = useCallback((tab) => {
+    setActiveTab(tab);
+    const path = TAB_TO_PATH[tab] || '/';
+    if (window.location.pathname !== path) {
+      window.history.pushState({ tab }, '', path);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onPop = () => setActiveTab(getTabFromURL());
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
   // ── Landing (full screen) ──
-  if (activeTab === 'landing') return <LandingPage onOpenApp={(tab) => setActiveTab(tab)} />;
+  if (activeTab === 'landing') return <LandingPage onOpenApp={navigate} />;
 
   // ── App Shell: sidebar + bottom nav ──
   const tabs = [
@@ -121,7 +150,7 @@ export default function App() {
 
       {/* Desktop Sidebar */}
       <aside className="sidebar">
-        <button className="sidebar-brand" onClick={() => setActiveTab('landing')}>
+        <button className="sidebar-brand" onClick={() => navigate('landing')}>
           <div className="sidebar-logo"><MicIcon /></div>
           <span className="sidebar-title">Smart Dictation</span>
         </button>
@@ -129,13 +158,13 @@ export default function App() {
           {tabs.map(t => (
             <button key={t.id}
               className={`sidebar-link ${activeTab === t.id ? 'sidebar-link--active' : ''}`}
-              onClick={() => setActiveTab(t.id)}>
+              onClick={() => navigate(t.id)}>
               <span className="sidebar-link-icon">{t.icon}</span>
               {t.label}
             </button>
           ))}
         </nav>
-        <button className="sidebar-back" onClick={() => setActiveTab('landing')}>
+        <button className="sidebar-back" onClick={() => navigate('landing')}>
           ← All surfaces
         </button>
       </aside>
@@ -152,7 +181,7 @@ export default function App() {
             onLearnCorrection={handleLearnCorrection} corrections={corrections} profile={profile}
           />
         )}
-        {activeTab === 'dashboard' && <DashboardPage profile={profile} onOpenDictate={() => setActiveTab('dictate')} />}
+        {activeTab === 'dashboard' && <DashboardPage profile={profile} onOpenDictate={() => navigate('dictate')} />}
         {activeTab === 'settings' && <SettingsPage profile={profile} onOpenSettings={() => setAdvancedSettingsOpen(true)} />}
         {activeTab === 'profile' && <ProfilePage profile={profile} onExport={handleExport} onImport={handleImport} onReset={handleReset} />}
       </div>
@@ -162,7 +191,7 @@ export default function App() {
         {tabs.map(t => (
           <button key={t.id}
             className={`bottom-nav-item ${activeTab === t.id ? 'bottom-nav-item--active' : ''}`}
-            onClick={() => setActiveTab(t.id)}>
+            onClick={() => navigate(t.id)}>
             <span>{t.icon}</span>
             <span>{t.label}</span>
           </button>

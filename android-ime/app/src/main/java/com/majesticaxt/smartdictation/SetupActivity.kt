@@ -25,7 +25,7 @@ class SetupActivity : AppCompatActivity() {
         private const val KEY_SETUP_DONE = "setup_done_v2"
         private const val KEY_DICTATION_COUNT = "stat_dictations"
         private const val KEY_WORD_COUNT = "stat_words"
-        private const val PWA_URL = "https://smart-dictation-gamma.vercel.app"
+        private const val PWA_URL = "https://smart-dictation-gamma.vercel.app/dashboard"
     }
 
     private val requestMic = registerForActivityResult(
