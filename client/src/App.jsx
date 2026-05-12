@@ -83,11 +83,15 @@ export default function App() {
     setIsCleaning(true); setPreviousText(text);
     try {
       const cleaned = await cleanTextWithAI(text, profile);
-      const localCleaned = cleanTextLocally(cleaned, profile);
-      setCorrections(detectCorrections(text, localCleaned, profile));
-      setText(localCleaned); incrementStat('totalCleanups');
+      const { cleanedText } = cleanTextLocally(cleaned, profile);
+      setCorrections(detectCorrections(text, cleanedText, profile));
+      setText(cleanedText); incrementStat('totalCleanups');
       showNotification('✨ Text cleaned with AI');
-    } catch { setText(cleanTextLocally(text, profile)); showNotification('🔧 Cleaned locally'); }
+    } catch {
+      const { cleanedText } = cleanTextLocally(text, profile);
+      setText(cleanedText);
+      showNotification('🔧 Cleaned locally');
+    }
     finally { setIsCleaning(false); }
   }, [text, isCleaning, profile, incrementStat]);
   const handleSpeak = useCallback(() => { if (text.trim()) speak(text); }, [text, speak]);
