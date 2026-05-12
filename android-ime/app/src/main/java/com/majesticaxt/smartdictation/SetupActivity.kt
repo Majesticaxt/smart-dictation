@@ -71,10 +71,6 @@ class SetupActivity : AppCompatActivity() {
             val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             imm.showInputMethodPicker()
         }
-        // Open PWA from dashboard
-        findViewById<Button>(R.id.btn_open_pwa)?.setOnClickListener {
-            launchPWA()
-        }
 
         // ── Decide which screen to show ──
         if (prefs().getBoolean(KEY_SETUP_DONE, false)) {
