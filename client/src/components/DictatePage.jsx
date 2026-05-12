@@ -50,10 +50,8 @@ export default function DictatePage({
         <p className="glass-card-label">Live transcript</p>
         <TextEditor
           text={text}
+          setText={setText}
           previousText={previousText}
-          onTextChange={setText}
-          corrections={corrections}
-          onLearnCorrection={onLearnCorrection}
         />
       </div>
 
