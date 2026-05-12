@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
@@ -13,6 +14,8 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabColorSchemeParams
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 
 class SetupActivity : AppCompatActivity() {
@@ -22,6 +25,7 @@ class SetupActivity : AppCompatActivity() {
         private const val KEY_SETUP_DONE = "setup_done_v2"
         private const val KEY_DICTATION_COUNT = "stat_dictations"
         private const val KEY_WORD_COUNT = "stat_words"
+        private const val PWA_URL = "https://smart-dictation-gamma.vercel.app"
     }
 
     private val requestMic = registerForActivityResult(
@@ -40,9 +44,20 @@ class SetupActivity : AppCompatActivity() {
             startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
         }
         findViewById<Button>(R.id.btn_finish_setup).setOnClickListener {
-            // Mark setup as done permanently
-            prefs().edit().putBoolean(KEY_SETUP_DONE, true).apply()
-            showDashboard()
+            val hasMic = ContextCompat.checkSelfPermission(
+                this, Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+            val kbEnabled = isKeyboardEnabled()
+
+            if (hasMic && kbEnabled) {
+                // Setup fully complete → save and launch PWA dashboard
+                prefs().edit().putBoolean(KEY_SETUP_DONE, true).apply()
+                launchPWA()
+            } else {
+                // Setup incomplete → stay on setup screen
+                prefs().edit().putBoolean(KEY_SETUP_DONE, false).apply()
+                refreshSetupUI()
+            }
         }
 
         // ── Dashboard buttons ──
@@ -55,6 +70,10 @@ class SetupActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_switch_keyboard).setOnClickListener {
             val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             imm.showInputMethodPicker()
+        }
+        // Open PWA from dashboard
+        findViewById<Button>(R.id.btn_open_pwa)?.setOnClickListener {
+            launchPWA()
         }
 
         // ── Decide which screen to show ──
@@ -157,6 +176,29 @@ class SetupActivity : AppCompatActivity() {
             imm.enabledInputMethodList.any { it.packageName == packageName }
         } catch (e: Exception) {
             false
+        }
+    }
+
+    /**
+     * Launch PWA dashboard in a Chrome Custom Tab.
+     * Looks native — no browser chrome, uses our theme color.
+     * Only called after setup is fully complete.
+     */
+    private fun launchPWA() {
+        try {
+            val colorParams = CustomTabColorSchemeParams.Builder()
+                .setToolbarColor(0xFF0d0d1a.toInt())
+                .setNavigationBarColor(0xFF0d0d1a.toInt())
+                .build()
+            val intent = CustomTabsIntent.Builder()
+                .setDefaultColorSchemeParams(colorParams)
+                .setColorScheme(CustomTabsIntent.COLOR_SCHEME_DARK)
+                .setShowTitle(false)
+                .build()
+            intent.launchUrl(this, Uri.parse(PWA_URL))
+        } catch (e: Exception) {
+            // Fallback: open in default browser
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PWA_URL)))
         }
     }
 }

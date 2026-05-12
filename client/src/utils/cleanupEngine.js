@@ -36,14 +36,15 @@ export function cleanTextLocally(text, profile = {}) {
     }
   }
 
-  // 2. Apply user's custom corrections
-  const corrections = profile.corrections || {};
-  for (const [wrong, right] of Object.entries(corrections)) {
-    const regex = new RegExp(`\\b${escapeRegex(wrong)}\\b`, 'gi');
+  // 2. Apply user's custom corrections (array of {original, corrected})
+  const corrections = Array.isArray(profile.corrections) ? profile.corrections : [];
+  for (const corr of corrections) {
+    if (!corr.original || !corr.corrected) continue;
+    const regex = new RegExp(`\\b${escapeRegex(corr.original)}\\b`, 'gi');
     const before = result;
-    result = result.replace(regex, right);
+    result = result.replace(regex, corr.corrected);
     if (result !== before) {
-      changes.push({ type: 'correction', original: wrong, replacement: right });
+      changes.push({ type: 'correction', original: corr.original, replacement: corr.corrected });
     }
   }
 

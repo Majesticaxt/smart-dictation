@@ -35,21 +35,42 @@ jobs:
           cp client/public/icon-512.png android-ime/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
           rm -rf android-ime/app/src/main/res/mipmap-anydpi-v26
 
-      - name: Create persistent signing keystore
+      # ── PERSISTENT KEYSTORE ──
+      # Uses a base64-encoded keystore stored in GitHub Secrets.
+      # This ensures EVERY build produces the SAME signature,
+      # so app updates install without "conflicting signature" errors.
+      #
+      # To set up (one-time):
+      #   1. Generate a keystore:
+      #      keytool -genkeypair -alias smartdictation -keypass smartdict123 \
+      #        -keystore smartdictation.keystore -storepass smartdict123 \
+      #        -dname "CN=Smart Dictation,O=Majesticaxt" -keyalg RSA -keysize 2048 -validity 10000
+      #   2. Base64 encode it:
+      #      base64 -w 0 smartdictation.keystore > keystore.b64
+      #   3. Add GitHub Secrets:
+      #      KEYSTORE_BASE64 = contents of keystore.b64
+      #      KEYSTORE_PASSWORD = smartdict123
+      #      KEY_ALIAS = smartdictation
+      #      KEY_PASSWORD = smartdict123
+      - name: Restore signing keystore
         run: |
           KEYSTORE_PATH="$HOME/.android/debug.keystore"
           mkdir -p "$HOME/.android"
-          # Generate a deterministic debug keystore so every build produces
-          # the same signature — this prevents "app conflicts" on updates
-          keytool -genkeypair \
-            -alias androiddebugkey \
-            -keypass android \
-            -keystore "$KEYSTORE_PATH" \
-            -storepass android \
-            -dname "CN=Smart Dictation,OU=Dev,O=Majesticaxt,L=Lagos,S=Lagos,C=NG" \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "Using persistent keystore from secrets..."
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$KEYSTORE_PATH"
+          else
+            echo "No keystore secret found. Generating temporary keystore..."
+            keytool -genkeypair \
+              -alias androiddebugkey \
+              -keypass android \
+              -keystore "$KEYSTORE_PATH" \
+              -storepass android \
+              -dname "CN=Smart Dictation,OU=Dev,O=Majesticaxt,L=Lagos,S=Lagos,C=NG" \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000
+          fi
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -69,4 +90,21 @@ jobs:
         with:
           name: SmartDictation
           path: android-ime/app/build/outputs/apk/debug/SmartDictation-debug.apk
-          retention-days: 7
+          retention-days: 30
+
+      # Auto-create a GitHub Release for easy APK download
+      - name: Create Release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Smart Dictation v${{ github.run_number }}
+          files: android-ime/app/build/outputs/apk/debug/SmartDictation-debug.apk
+          body: |
+            🎤 Smart Dictation Android IME
+            
+            Download and install the APK on your Android device.
+            
+            **Setup:** Open → Enable keyboard → Switch to Smart Dictation
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

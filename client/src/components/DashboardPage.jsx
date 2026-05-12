@@ -69,6 +69,28 @@ export default function DashboardPage({ profile, onOpenDictate }) {
           ))}
         </div>
       </section>
+
+      {/* Learned Corrections */}
+      {profile.corrections && profile.corrections.length > 0 && (
+        <section style={{ marginTop: 8 }}>
+          <div className="section-header-row">
+            <h2 className="section-title">Learned Corrections</h2>
+            <span className="section-badge">{profile.corrections.length}</span>
+          </div>
+          <div className="glass-card">
+            <div className="commands-list">
+              {profile.corrections.slice(0, 6).map((c, i) => (
+                <div key={i} className="command-item">
+                  <span className="command-icon">🧠</span>
+                  <span className="command-from">{c.original}</span>
+                  <span className="command-arrow">→</span>
+                  <span className="command-to">{c.corrected}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </main>
   );
 }

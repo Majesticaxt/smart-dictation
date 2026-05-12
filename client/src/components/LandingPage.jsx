@@ -1,13 +1,13 @@
 /**
- * LandingPage — Hero section inspired by eloquent-flow-engine reference.
- * Gradient hero background, tagline, and 3 surface cards with staggered animations.
+ * LandingPage — Hero section with gradient background.
+ * Cards route to: Web App → dictate, Android Keyboard → setup info, API → dashboard.
  */
 export default function LandingPage({ onOpenApp }) {
   const surfaces = [
     {
       title: 'Web App',
-      subtitle: 'PWA dashboard, dictation, settings',
-      hint: 'Mobile-first',
+      subtitle: 'Dictate, clean, and manage your transcriptions from any browser.',
+      hint: 'Open App',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
@@ -19,24 +19,24 @@ export default function LandingPage({ onOpenApp }) {
     },
     {
       title: 'Android Keyboard',
-      subtitle: 'IME voice keyboard + setup flow',
-      hint: 'Native feel',
+      subtitle: 'Native IME with voice dictation. Works in WhatsApp, Notes, and every app.',
+      hint: 'Download APK',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
           <path d="M12 18h.01" />
         </svg>
       ),
-      action: () => window.open('https://github.com/Majesticaxt/smart-dictation/actions', '_blank'),
+      action: () => window.open('https://github.com/Majesticaxt/smart-dictation/releases', '_blank'),
     },
     {
-      title: 'Developer API',
-      subtitle: 'Endpoints, docs, integration',
-      hint: 'JSON + cURL',
+      title: 'Dashboard',
+      subtitle: 'View your stats, learned corrections, voice commands, and profile.',
+      hint: 'View Stats',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="16 18 22 12 16 6" />
-          <polyline points="8 6 2 12 8 18" />
+          <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
         </svg>
       ),
       action: () => onOpenApp('dashboard'),
@@ -59,8 +59,10 @@ export default function LandingPage({ onOpenApp }) {
           <span className="landing-logo-text">Smart Dictation</span>
         </div>
         <nav className="landing-nav">
-          <button onClick={() => onOpenApp('dictate')} className="landing-nav-link">App</button>
+          <button onClick={() => onOpenApp('dictate')} className="landing-nav-link">Dictate</button>
           <button onClick={() => onOpenApp('dashboard')} className="landing-nav-link">Dashboard</button>
+          <button onClick={() => onOpenApp('settings')} className="landing-nav-link">Settings</button>
+          <button onClick={() => onOpenApp('profile')} className="landing-nav-link">Profile</button>
         </nav>
       </header>
 
