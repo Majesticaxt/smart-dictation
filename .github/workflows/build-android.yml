@@ -6,6 +6,9 @@ on:
     paths: [ 'android-ime/**', '.github/workflows/build-android.yml', 'client/public/icon-512.png' ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
