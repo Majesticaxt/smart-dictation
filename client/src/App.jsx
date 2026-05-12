@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import LandingPage from './components/LandingPage';
 import DictatePage from './components/DictatePage';
 import DashboardPage from './components/DashboardPage';
@@ -31,8 +31,50 @@ export default function App() {
     updateTTSSettings, incrementStat, handleExport, handleImport, handleReset,
   } = useProfile();
 
-  const speechRecognition = useSpeechRecognition(text, setText, profile);
+  const speechRecognition = useSpeechRecognition(profile.punctuationAliases || {});
   const { speak } = useSpeechSynthesis(profile.ttsSettings);
+
+  // Wire up speech recognition callbacks to update text state
+  const textRef = useRef(text);
+  textRef.current = text;
+
+  useEffect(() => {
+    speechRecognition.setOnResult((processed) => {
+      setText(prev => {
+        const separator = prev && !prev.endsWith('\n') ? ' ' : '';
+        const updated = prev + separator + processed;
+        incrementStat('wordsTranscribed', processed.trim().split(/\s+/).length);
+        return updated;
+      });
+    });
+  }, [speechRecognition, incrementStat]);
+
+  useEffect(() => {
+    speechRecognition.setOnReplace((oldText, newText) => {
+      setText(prev => prev.replace(oldText, newText));
+    });
+  }, [speechRecognition]);
+
+  useEffect(() => {
+    speechRecognition.setOnCommand((command) => {
+      switch (command.action) {
+        case 'DELETE_LAST_SENTENCE':
+          setText(prev => prev.replace(/[^.!?]*[.!?]?\s*$/, '').trim());
+          break;
+        case 'DELETE_LAST_WORD':
+          setText(prev => prev.replace(/\s*\S+\s*$/, ''));
+          break;
+        case 'DELETE_LAST_CHUNK':
+          setText(prev => prev.split(/\s+/).slice(0, -5).join(' '));
+          break;
+        case 'CLEAR_ALL':
+          setPreviousText(textRef.current);
+          setText('');
+          break;
+        default: break;
+      }
+    });
+  }, [speechRecognition]);
 
   const handleStartRecording = useCallback(() => { speechRecognition.start(); incrementStat('totalDictations'); }, [speechRecognition, incrementStat]);
   const handleStopRecording = useCallback(() => { speechRecognition.stop(); }, [speechRecognition]);
